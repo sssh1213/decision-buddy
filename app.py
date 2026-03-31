@@ -3,7 +3,7 @@ import streamlit as st
 # 1. 頁面基本設定
 st.set_page_config(page_title="DecisionSS", page_icon="⚖️", layout="centered")
 
-# 2. 燕麥白、純白與莫蘭迪 CSS 注入 (加入輕量化滑桿設計)
+# 2. 燕麥白、純白與莫蘭迪 CSS 注入
 morandi_style = """
     <style>
     #MainMenu {visibility: hidden;}
@@ -87,17 +87,29 @@ if 'criteria' not in st.session_state:
 def add_criterion():
     st.session_state.criteria.append({"name": "新考量因素", "weight": 3, "score_a": 3, "score_b": 3})
 
-# 6. 渲染滑桿區塊
+# 6. 渲染評估區塊
 st.markdown("<h5 style='text-align: center; font-weight: 500;'>— 評估維度 —</h5>", unsafe_allow_html=True)
 
 for i, c in enumerate(st.session_state.criteria):
     with st.container():
+        # 因素名稱
         c["name"] = st.text_input("因素名稱", c["name"], key=f"name_{i}", label_visibility="collapsed")
         
-        # 標明這是權重
-        st.markdown("<p style='font-size: 12px; margin-bottom: -10px;'>💡 此因素的致命程度</p>", unsafe_allow_html=True)
-        c["weight"] = st.slider("", 1, 5, c["weight"], key=f"w_{i}", label_visibility="collapsed")
+        # 【修改區塊】將致命程度改為水平按鈕 (Radio)
+        st.markdown("<p style='font-size: 13px; font-weight: 600; margin-top: 10px; margin-bottom: -15px;'>💡 此因素的致命程度 (1=還好, 5=絕對關鍵)</p>", unsafe_allow_html=True)
+        # 使用 st.radio 並設定 horizontal=True，呈現出一排按鈕的效果
+        c["weight"] = st.radio(
+            "致命程度", 
+            options=[1, 2, 3, 4, 5], 
+            index=c["weight"] - 1, # index 是從 0 開始算，所以減 1
+            key=f"w_{i}", 
+            horizontal=True, 
+            label_visibility="collapsed"
+        )
         
+        st.markdown("<br>", unsafe_allow_html=True) # 增加一點留白
+        
+        # 選項 A 與 B 的滑桿 (維持不變)
         col_a, col_b = st.columns(2)
         with col_a:
             c["score_a"] = st.slider(f"🤎 {option_a if option_a else 'A'} 的表現", 1, 5, c["score_a"], key=f"a_{i}")
@@ -134,7 +146,6 @@ if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True
     
     # --- 深度數據分析邏輯 ---
     if score_a == score_b:
-        # 找出權重最高的項目
         highest_weight_item = max(st.session_state.criteria, key=lambda x: x["weight"])["name"]
         st.warning(f"⚖️ **平分秋色！宇宙級的糾結！**\n\n醒醒吧！數據顯示這兩個選項對你來說根本一樣好（或一樣糟）。你明明在「**{highest_weight_item}**」給了那麼高的權重，結果兩邊表現居然差不多？建議拋個硬幣，或者去給自己沖杯 Espresso 醒醒腦。再糾結下去只是浪費生命！")
     else:
@@ -142,7 +153,6 @@ if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True
         loser = name_b if score_a > score_b else name_a
         diff = abs(score_a - score_b)
         
-        # 尋找贏家勝出最多的項目，以及輸家挽回顏面的項目
         adv_list = []
         for c in st.session_state.criteria:
             val_a = c["weight"] * c["score_a"]
@@ -153,17 +163,15 @@ if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True
                 adv = val_b - val_a
             adv_list.append({"name": c["name"], "adv": adv})
         
-        # 根據優勢排序
         adv_list.sort(key=lambda x: x["adv"], reverse=True)
-        killer_factor = adv_list[0]["name"] # 贏家拉開差距的致命武器
+        killer_factor = adv_list[0]["name"] 
         
-        pity_factor = None # 輸家唯一贏的項目
+        pity_factor = None 
         for item in reversed(adv_list):
             if item["adv"] < 0:
                 pity_factor = item["name"]
                 break
                 
-        # 組合毒舌文字
         if diff >= (max_possible * 0.2): 
             text = f"🎉 **毫無懸念，【{winner}】徹底碾壓了【{loser}】！**\n\n光是在「**{killer_factor}**」這個項目上，【{winner}】就已經把對手按在地上摩擦了。分數懸殊成這樣，你到底還在猶豫什麼？"
             if pity_factor:
