@@ -48,16 +48,21 @@ morandi_style = """
         color: #FFFFFF !important;
     }
 
-    /* 讓滑桿視覺變輕盈 (淺色軌道與低調的莫蘭迪咖把手) */
+    /* 讓滑桿視覺變輕盈 */
     div[data-baseweb="slider"] > div > div > div:nth-child(1) {
-        background-color: #E8E3DF !important; /* 極淺的燕麥灰軌道 */
+        background-color: #E8E3DF !important; 
     }
     div[data-baseweb="slider"] > div > div > div:nth-child(2) {
-        background-color: #A48A7A !important; /* 已走過的軌道：莫蘭迪咖 */
+        background-color: #A48A7A !important; 
     }
     div[data-baseweb="slider"] > div > div > div[role="slider"] {
-        background-color: #8D7464 !important; /* 滑動把手 */
+        background-color: #8D7464 !important; 
         box-shadow: 0 0 5px rgba(0,0,0,0.1) !important;
+    }
+
+    /* 讓單選按鈕 (Radio) 水平置中排列 */
+    div[role="radiogroup"] {
+        justify-content: center !important;
     }
     </style>
 """
@@ -95,21 +100,22 @@ for i, c in enumerate(st.session_state.criteria):
         # 因素名稱
         c["name"] = st.text_input("因素名稱", c["name"], key=f"name_{i}", label_visibility="collapsed")
         
-        # 【修改區塊】將致命程度改為水平按鈕 (Radio)
-        st.markdown("<p style='font-size: 13px; font-weight: 600; margin-top: 10px; margin-bottom: -15px;'>💡 此因素的致命程度 (1=還好, 5=絕對關鍵)</p>", unsafe_allow_html=True)
-        # 使用 st.radio 並設定 horizontal=True，呈現出一排按鈕的效果
+        # 【修改區塊】字體放大 (16px)、增加底部邊距 (15px)、並置中對齊
+        st.markdown("<p style='text-align: center; font-size: 16px; font-weight: 600; margin-top: 15px; margin-bottom: 15px;'>💡 此因素的致命程度 (1=還好, 5=絕對關鍵)</p>", unsafe_allow_html=True)
+        
+        # 單選按鈕 (透過上方的 CSS 已經達成置中)
         c["weight"] = st.radio(
             "致命程度", 
             options=[1, 2, 3, 4, 5], 
-            index=c["weight"] - 1, # index 是從 0 開始算，所以減 1
+            index=c["weight"] - 1, 
             key=f"w_{i}", 
             horizontal=True, 
             label_visibility="collapsed"
         )
         
-        st.markdown("<br>", unsafe_allow_html=True) # 增加一點留白
+        st.markdown("<br>", unsafe_allow_html=True) # 增加與下方滑桿的呼吸空間
         
-        # 選項 A 與 B 的滑桿 (維持不變)
+        # 選項 A 與 B 的滑桿
         col_a, col_b = st.columns(2)
         with col_a:
             c["score_a"] = st.slider(f"🤎 {option_a if option_a else 'A'} 的表現", 1, 5, c["score_a"], key=f"a_{i}")
