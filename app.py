@@ -1,30 +1,26 @@
 import streamlit as st
 
-# 1. 頁面基本設定 (置中排版)
-st.set_page_config(page_title="Decisions.", page_icon="⚖️", layout="centered")
+# 1. 頁面基本設定
+st.set_page_config(page_title="DecisionSS", page_icon="⚖️", layout="centered")
 
-# 2. 燕麥白、純白與莫蘭迪 CSS 注入
+# 2. 燕麥白、純白與莫蘭迪 CSS 注入 (加入輕量化滑桿設計)
 morandi_style = """
     <style>
-    /* 隱藏預設選單與頁尾 */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 全域燕麥白背景與深灰字體 */
     .stApp {
-        background-color: #F4F1ED; /* 燕麥白 */
-        color: #5C5855; /* 莫蘭迪深灰 */
+        background-color: #F4F1ED; 
+        color: #5C5855; 
         max-width: 600px; 
         margin: 0 auto;
     }
     
-    /* 標題與文字顏色設定為深灰 */
     h2, h4, h5, p, span, label {
         color: #5C5855 !important; 
     }
     
-    /* 輸入框白底化，增加層次感 */
     .stTextInput > div > div > input {
         background-color: #FFFFFF !important;
         border: 1px solid #D5CABD !important;
@@ -32,15 +28,14 @@ morandi_style = """
         color: #5C5855 !important;
     }
     
-    /* 分隔線改為溫柔的燕麥深色虛線 */
     hr {
         border-top: 1px dashed #D5CABD !important; 
         margin: 1.5em 0;
     }
     
-    /* 按鈕顏色改造 (莫蘭迪咖) */
+    /* 按鈕顏色改造 */
     div.stButton > button:first-child {
-        background-color: #A48A7A !important; /* 莫蘭迪咖 */
+        background-color: #A48A7A !important; 
         color: #FFFFFF !important;
         border: none !important;
         border-radius: 8px !important;
@@ -49,8 +44,20 @@ morandi_style = """
         transition: all 0.3s ease;
     }
     div.stButton > button:first-child:hover {
-        background-color: #8D7464 !important; /* 滑過時加深 */
+        background-color: #8D7464 !important; 
         color: #FFFFFF !important;
+    }
+
+    /* 讓滑桿視覺變輕盈 (淺色軌道與低調的莫蘭迪咖把手) */
+    div[data-baseweb="slider"] > div > div > div:nth-child(1) {
+        background-color: #E8E3DF !important; /* 極淺的燕麥灰軌道 */
+    }
+    div[data-baseweb="slider"] > div > div > div:nth-child(2) {
+        background-color: #A48A7A !important; /* 已走過的軌道：莫蘭迪咖 */
+    }
+    div[data-baseweb="slider"] > div > div > div[role="slider"] {
+        background-color: #8D7464 !important; /* 滑動把手 */
+        box-shadow: 0 0 5px rgba(0,0,0,0.1) !important;
     }
     </style>
 """
@@ -77,7 +84,6 @@ if 'criteria' not in st.session_state:
         {"name": "心靈滿足感", "weight": 5, "score_a": 3, "score_b": 3}
     ]
 
-# 新增項目的函數
 def add_criterion():
     st.session_state.criteria.append({"name": "新考量因素", "weight": 3, "score_a": 3, "score_b": 3})
 
@@ -86,13 +92,12 @@ st.markdown("<h5 style='text-align: center; font-weight: 500;'>— 評估維度 
 
 for i, c in enumerate(st.session_state.criteria):
     with st.container():
-        # 因素名稱
         c["name"] = st.text_input("因素名稱", c["name"], key=f"name_{i}", label_visibility="collapsed")
         
-        # 權重滑桿
-        c["weight"] = st.slider("⚖️ 此因素的致命程度 (1=還好, 5=絕對關鍵)", 1, 5, c["weight"], key=f"w_{i}")
+        # 標明這是權重
+        st.markdown("<p style='font-size: 12px; margin-bottom: -10px;'>💡 此因素的致命程度</p>", unsafe_allow_html=True)
+        c["weight"] = st.slider("", 1, 5, c["weight"], key=f"w_{i}", label_visibility="collapsed")
         
-        # 評分滑桿 (換成咖色與深灰色的符號)
         col_a, col_b = st.columns(2)
         with col_a:
             c["score_a"] = st.slider(f"🤎 {option_a if option_a else 'A'} 的表現", 1, 5, c["score_a"], key=f"a_{i}")
@@ -101,12 +106,11 @@ for i, c in enumerate(st.session_state.criteria):
         
         st.markdown("<hr>", unsafe_allow_html=True)
 
-# 新增按鈕
 st.button("＋ 覺得還不夠？再加一個條件", on_click=add_criterion, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 7. 計算與毒舌結果呈現
+# 7. 計算與【靈魂深度分析】結果呈現
 if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True):
     name_a = option_a if option_a else "選項 A"
     name_b = option_b if option_b else "選項 B"
@@ -128,18 +132,55 @@ if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 判斷勝負與差距
-    diff = abs(score_a - score_b)
-    
+    # --- 深度數據分析邏輯 ---
     if score_a == score_b:
-        st.warning("⚖️ **平分秋色，或者說...半斤八兩？**\n\n醒醒吧！數據顯示這兩個選項對你來說根本一樣好（或一樣糟）。建議拋個硬幣，或者去給自己沖杯 Espresso 醒醒腦。再糾結下去只是浪費生命！")
+        # 找出權重最高的項目
+        highest_weight_item = max(st.session_state.criteria, key=lambda x: x["weight"])["name"]
+        st.warning(f"⚖️ **平分秋色！宇宙級的糾結！**\n\n醒醒吧！數據顯示這兩個選項對你來說根本一樣好（或一樣糟）。你明明在「**{highest_weight_item}**」給了那麼高的權重，結果兩邊表現居然差不多？建議拋個硬幣，或者去給自己沖杯 Espresso 醒醒腦。再糾結下去只是浪費生命！")
     else:
         winner = name_a if score_a > score_b else name_b
         loser = name_b if score_a > score_b else name_a
+        diff = abs(score_a - score_b)
         
+        # 尋找贏家勝出最多的項目，以及輸家挽回顏面的項目
+        adv_list = []
+        for c in st.session_state.criteria:
+            val_a = c["weight"] * c["score_a"]
+            val_b = c["weight"] * c["score_b"]
+            if score_a > score_b:
+                adv = val_a - val_b
+            else:
+                adv = val_b - val_a
+            adv_list.append({"name": c["name"], "adv": adv})
+        
+        # 根據優勢排序
+        adv_list.sort(key=lambda x: x["adv"], reverse=True)
+        killer_factor = adv_list[0]["name"] # 贏家拉開差距的致命武器
+        
+        pity_factor = None # 輸家唯一贏的項目
+        for item in reversed(adv_list):
+            if item["adv"] < 0:
+                pity_factor = item["name"]
+                break
+                
+        # 組合毒舌文字
         if diff >= (max_possible * 0.2): 
-            st.success(f"🎉 **毫無懸念，【{winner}】徹底碾壓了【{loser}】！**\n\n分數懸殊成這樣，你到底還在猶豫什麼？選 {loser} 完全是拿石頭砸自己的腳。聽數據的，果斷投入 {winner} 的懷抱吧！")
+            text = f"🎉 **毫無懸念，【{winner}】徹底碾壓了【{loser}】！**\n\n光是在「**{killer_factor}**」這個項目上，【{winner}】就已經把對手按在地上摩擦了。分數懸殊成這樣，你到底還在猶豫什麼？"
+            if pity_factor:
+                text += f"\n\n雖然【{loser}】在「**{pity_factor}**」試圖挽回一點顏面，但根本是螳臂擋車。聽數據的，果斷投入【{winner}】的懷抱吧！"
+            else:
+                text += f"\n\n可憐的【{loser}】連一個能打的項目都沒有。選它完全是拿石頭砸自己的腳！"
+            st.success(text)
+            
         elif diff >= (max_possible * 0.1): 
-            st.info(f"✨ **【{winner}】勝出！**\n\n雖然 {loser} 也有它的好，但綜合你的『貪心程度』與『現實考量』，{winner} 才是那個對的選擇。別再看另一個了，不甘心是不會有好結果的！")
+            text = f"✨ **【{winner}】穩穩勝出！**\n\n綜合你的『貪心程度』與『現實考量』，【{winner}】才是那個對的選擇。它在「**{killer_factor}**」上的亮眼表現是這次獲勝的關鍵。"
+            if pity_factor:
+                text += f" 別再看【{loser}】了，就算它在「**{pity_factor}**」有小優勢，但「大人全都要」是不可能的。不甘心是不會有好結果的！"
+            st.info(text)
+            
         else: 
-            st.info(f"🤏 **【{winner}】以微弱優勢險勝！**\n\n這分數黏得比麥芽糖還緊。老實說，你心裡是不是本來就比較偏袒 {winner}？這個測驗只是給你一個冠冕堂皇的藉口罷了。去吧，就順從你的直覺選它！")
+            text = f"🤏 **【{winner}】以微弱優勢險勝！**\n\n這分數黏得比麥芽糖還緊！【{winner}】只不過是靠著在「**{killer_factor}**」上多拿了一點分數苟延殘喘贏了這局。"
+            if pity_factor:
+                text += f" 而且別忘了，【{loser}】在「**{pity_factor}**」可是贏過它的！"
+            text += f"\n\n老實說，分數咬這麼緊，你心裡是不是本來就比較偏袒【{winner}】？這個測驗只是給你一個冠冕堂皇的藉口罷了。去吧，就順從你的直覺選它！"
+            st.info(text)
