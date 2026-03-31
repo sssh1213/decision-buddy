@@ -57,7 +57,7 @@ morandi_style = """
 st.markdown(morandi_style, unsafe_allow_html=True)
 
 # 3. 極簡風格標題
-st.markdown("<h2 style='text-align: center; font-weight: 600; margin-bottom: 0;'>Decisions.</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; font-weight: 600; margin-bottom: 0;'>Decisions</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 14px; letter-spacing: 1px;'>放下執念，讓數據打醒你</p>", unsafe_allow_html=True)
 st.markdown("---")
 
