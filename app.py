@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 1. 頁面基本設定 (置中排版)
-st.set_page_config(page_title="Decisions.", page_icon="⚖️", layout="centered")
+st.set_page_config(page_title="Decisions", page_icon="⚖️", layout="centered")
 
 # 2. 燕麥白、純白與莫蘭迪 CSS 注入
 morandi_style = """
