@@ -1,96 +1,139 @@
 import streamlit as st
 
-# 1. 頁面基本設定 (置中排版、簡約圖示)
-st.set_page_config(page_title="Decisions.", page_icon="⚪", layout="centered")
+# 1. 頁面基本設定 (置中排版)
+st.set_page_config(page_title="Decisions.", page_icon="⚖️", layout="centered")
 
-# 2. 注入 CSS 來隱藏預設的標頭、頁尾，並美化字體與留白
-hide_style = """
+# 2. 莫蘭迪色系 CSS 注入
+morandi_style = """
     <style>
+    /* 隱藏預設選單與頁尾 */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
-    .stApp {max-width: 600px; margin: 0 auto;} /* 限制最大寬度，讓手機與電腦看都簡約 */
+    
+    /* 全域莫蘭迪背景與字體顏色 */
+    .stApp {
+        background-color: #F4F1ED; /* 燕麥白 */
+        color: #5C5855; /* 深灰褐 */
+        max-width: 600px; 
+        margin: 0 auto;
+    }
+    
+    /* 標題與文字顏色 */
+    h2, h4, h5, p {
+        color: #6C7A89 !important; /* 莫蘭迪藍灰 */
+    }
+    
+    /* 分隔線改為溫柔的奶茶色虛線 */
+    hr {
+        border-top: 1px dashed #D5CABD !important; 
+    }
+    
+    /* 按鈕顏色改造 (莫蘭迪灰綠色) */
+    div.stButton > button:first-child {
+        background-color: #A3B1A6 !important; 
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+        padding: 0.5rem 1rem !important;
+    }
+    div.stButton > button:first-child:hover {
+        background-color: #8A9A8D !important;
+        color: white !important;
+    }
     </style>
 """
-st.markdown(hide_style, unsafe_allow_html=True)
+st.markdown(morandi_style, unsafe_allow_html=True)
 
 # 3. 簡約風格的標題
-st.markdown("<h2 style='text-align: center; color: #2c3e50; font-weight: 600; margin-bottom: 0;'>Decisions.</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7f8c8d; font-size: 14px;'>理性分析，優雅選擇</p>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; font-weight: 600; margin-bottom: 0;'>Decisions.</h2>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; font-size: 14px;'>放下執念，讓數據打醒你</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# 4. 選項輸入 (並排顯示)
+# 4. 選項輸入
 col1, col2 = st.columns(2)
 with col1:
-    option_a = st.text_input("選項 A", placeholder="例如：買筆電", label_visibility="collapsed")
+    option_a = st.text_input("選項 A", placeholder="例如：買新手機", label_visibility="collapsed")
 with col2:
-    option_b = st.text_input("選項 B", placeholder="例如：組裝桌機", label_visibility="collapsed")
+    option_b = st.text_input("選項 B", placeholder="例如：出國旅遊", label_visibility="collapsed")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 5. 初始化 Session State (用來記住有幾個評分項目)
+# 5. 初始化 Session State
 if 'criteria' not in st.session_state:
     st.session_state.criteria = [
-        {"name": "價格與預算", "weight": 4, "score_a": 3, "score_b": 3},
-        {"name": "外觀與質感", "weight": 3, "score_a": 3, "score_b": 3}
+        {"name": "價格與荷包的痛楚", "weight": 4, "score_a": 3, "score_b": 3},
+        {"name": "心靈滿足感", "weight": 5, "score_a": 3, "score_b": 3}
     ]
 
 # 新增項目的函數
 def add_criterion():
     st.session_state.criteria.append({"name": "新考量因素", "weight": 3, "score_a": 3, "score_b": 3})
 
-# 6. 渲染滑桿區塊 (直列排版，適合手機單手滑動)
-st.markdown("<h5 style='color: #34495e;'>評估維度</h5>", unsafe_allow_html=True)
+# 6. 渲染滑桿區塊
+st.markdown("<h5 style='text-align: center;'>— 評估維度 —</h5>", unsafe_allow_html=True)
 
 for i, c in enumerate(st.session_state.criteria):
     with st.container():
-        # 因素名稱輸入框
+        # 因素名稱
         c["name"] = st.text_input("因素名稱", c["name"], key=f"name_{i}", label_visibility="collapsed")
         
-        # 重要性滑桿
-        c["weight"] = st.slider("⚖️ 此因素的重要性", 1, 5, c["weight"], key=f"w_{i}")
+        # 權重滑桿
+        c["weight"] = st.slider("⚖️ 此因素的致命程度 (1=還好, 5=絕對關鍵)", 1, 5, c["weight"], key=f"w_{i}")
         
-        # 兩個選項的表現滑桿 (左右並排)
+        # 評分滑桿
         col_a, col_b = st.columns(2)
         with col_a:
             c["score_a"] = st.slider(f"🔵 {option_a if option_a else 'A'} 的表現", 1, 5, c["score_a"], key=f"a_{i}")
         with col_b:
             c["score_b"] = st.slider(f"🟢 {option_b if option_b else 'B'} 的表現", 1, 5, c["score_b"], key=f"b_{i}")
         
-        st.markdown("<hr style='margin: 1.5em 0; border-top: 1px dashed #e0e0e0;'>", unsafe_allow_html=True)
+        st.markdown("<hr>", unsafe_allow_html=True)
 
 # 新增按鈕
-st.button("＋ 新增考量因素", on_click=add_criterion, use_container_width=True)
+st.button("＋ 覺得還不夠？再加一個條件", on_click=add_criterion, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# 7. 計算與結果呈現
-if st.button("生成分析結果", type="primary", use_container_width=True):
-    # 計算加權總分
+# 7. 計算與毒舌結果呈現
+if st.button("🔮 揭曉殘酷真相", type="primary", use_container_width=True):
+    # 確保有輸入選項名稱，否則給預設值
+    name_a = option_a if option_a else "選項 A"
+    name_b = option_b if option_b else "選項 B"
+
     score_a = sum(c["weight"] * c["score_a"] for c in st.session_state.criteria)
     score_b = sum(c["weight"] * c["score_b"] for c in st.session_state.criteria)
-    
-    # 計算滿分會是多少 (用於進度條呈現)
     max_possible = sum(c["weight"] * 5 for c in st.session_state.criteria)
     
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<h4 style='text-align: center; color: #2c3e50;'>分析結論</h4>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center;'>— 分析結論 —</h4>", unsafe_allow_html=True)
     
-    # 顯示分數與進度條 (增加視覺設計感)
     res_col1, res_col2 = st.columns(2)
     with res_col1:
-        st.metric(label=f"🔵 {option_a if option_a else 'A'}", value=score_a)
+        st.metric(label=f"🔵 {name_a}", value=score_a)
         st.progress(score_a / max_possible if max_possible > 0 else 0)
     with res_col2:
-        st.metric(label=f"🟢 {option_b if option_b else 'B'}", value=score_b)
+        st.metric(label=f"🟢 {name_b}", value=score_b)
         st.progress(score_b / max_possible if max_possible > 0 else 0)
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 結論文字
-    if score_a > score_b:
-        st.success(f"✨ 數據顯示，**{option_a if option_a else '選項 A'}** 目前更符合你的綜合需求。")
-    elif score_b > score_a:
-        st.success(f"✨ 數據顯示，**{option_b if option_b else '選項 B'}** 目前更符合你的綜合需求。")
+    # 判斷勝負與差距
+    diff = abs(score_a - score_b)
+    
+    if score_a == score_b:
+        st.warning("⚖️ **平分秋色，或者說...半斤八兩？**\n\n醒醒吧！數據顯示這兩個選項對你來說根本一樣好（或一樣糟）。建議拋個硬幣，或者去給自己沖杯 Espresso 醒醒腦。再糾結下去只是浪費生命！")
     else:
-        st.info("⚖️ 兩者平分秋色！建議沉澱一下，或者再新增一個絕對關鍵的因素來打破僵局。")
+        winner = name_a if score_a > score_b else name_b
+        loser = name_b if score_a > score_b else name_a
+        
+        if diff >= (max_possible * 0.2): 
+            # 差距 20% 以上：大勝
+            st.success(f"🎉 **毫無懸念，【{winner}】徹底碾壓了【{loser}】！**\n\n分數懸殊成這樣，你到底還在猶豫什麼？選 {loser} 完全是拿石頭砸自己的腳。聽數據的，果斷投入 {winner} 的懷抱吧！")
+        elif diff >= (max_possible * 0.1): 
+            # 差距 10%~20%：中等差距
+            st.info(f"✨ **【{winner}】勝出！**\n\n雖然 {loser} 也有它的好，但綜合你的『貪心程度』與『現實考量』，{winner} 才是那個對的選擇。別再看另一個了，不甘心是不會有好結果的！")
+        else: 
+            # 差距不到 10%：險勝
+            st.info(f"🤏 **【{winner}】以微弱優勢險勝！**\n\n這分數黏得比麥芽糖還緊。老實說，你心裡是不是本來就比較偏袒 {winner}？這個測驗只是給你一個冠冕堂皇的藉口罷了。去吧，就順從你的直覺選它！")
