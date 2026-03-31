@@ -1,7 +1,7 @@
 import streamlit as st
 
 # 1. 頁面基本設定 (置中排版)
-st.set_page_config(page_title="Decisionss", page_icon="⚖️", layout="centered")
+st.set_page_config(page_title="Decisions.", page_icon="⚖️", layout="centered")
 
 # 2. 燕麥白、純白與莫蘭迪 CSS 注入
 morandi_style = """
@@ -57,7 +57,7 @@ morandi_style = """
 st.markdown(morandi_style, unsafe_allow_html=True)
 
 # 3. 極簡風格標題
-st.markdown("<h2 style='text-align: center; font-weight: 600; margin-bottom: 0;'>Decisionss</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: center; font-weight: 600; margin-bottom: 0;'>DecisionSS</h2>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; font-size: 14px; letter-spacing: 1px;'>放下執念，讓數據打醒你</p>", unsafe_allow_html=True)
 st.markdown("---")
 
